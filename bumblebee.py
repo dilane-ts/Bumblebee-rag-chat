@@ -2,16 +2,16 @@ import os
 from dotenv import load_dotenv
 
 from langchain.prompts import PromptTemplate
-from huggingface_hub import InferenceClient
 from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain_core.language_models import LLM
-from pydantic import Field, PrivateAttr
-from langchain.chains import RetrievalQA
-
+from langchain.chains.retrieval import create_retrieval_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_ollama import ChatOllama
+from langchain_google_genai.llms import GoogleGenerativeAI
 load_dotenv()
+GOOGLE_API_KEY = os.environ['GOOGLE_API_KEY']
 MODEL_ID = os.environ['MODEL_ID']
-HF_TOKEN = os.environ['HF_TOKEN']
+MODEL_TEMPERATURE = os.environ['MODEL_TEMPERATURE']
 
 def load_db(k:int=3):
     # Load vectorstore
@@ -20,59 +20,35 @@ def load_db(k:int=3):
     retriever = vector_store.as_retriever(seach_kwargs={"k": k})
     return retriever
 
-class HuggingFaceInferrenceLLM(LLM):
-    model: str
-    api_key: str
-    provider: str = Field(default='fireworks-ai')
-    kwargs: dict = Field(default_factory=dict)
-    _client: InferenceClient = PrivateAttr()
-
-    def __init__(self, **data):
-        super().__init__(**data)
-        self._client = InferenceClient(provider=self.provider, api_key=self.api_key)
-
-    @property
-    def _llm_type(self) -> str:
-        return "huggingface_inference"
-    
-    def _call(self, prompt, stop = None, callbacks = None, *, tags = None, metadata = None, **kwargs):
-        response = self._client.chat.completions.create(
-            model=self.model,
-            messages=[{"role": "user", "content": prompt}],
-            **self.kwargs
-        )
-
-        return response.choices[0].message.content
-    
-
-
-
 def build_bumblebee():
-    llm = HuggingFaceInferrenceLLM(model=MODEL_ID, api_key=HF_TOKEN)
-
+    llm = GoogleGenerativeAI(model=MODEL_ID, temperature=MODEL_TEMPERATURE)
     retriever = load_db(4)
 
-    prompt = PromptTemplate.from_template("""
-    Use the following context to answer the question. If unsure, say "I don't know."
+    template = """
+    Use the following context to answer the question. If unsure, say "I don't know.".
+    Response in the language of query.
     Context:
     {context}
-    Question: {question}
-    Answer:
-    """)
+    question: {input}
+    """
+    prompt = PromptTemplate.from_template(template)
 
-    bumblebee = RetrievalQA.from_chain_type(
-        llm=llm,
-        retriever=retriever,
-        chain_type_kwargs={"prompt": prompt},
-        return_source_documents=True
-    )
+    question_answer_chain = create_stuff_documents_chain(llm, prompt)
+    chain = create_retrieval_chain(retriever, question_answer_chain)
 
-    return bumblebee
+    return chain
 
 
 def resquest(model, query):
-    result = model({
-        "query": query
+    result = model.invoke({
+        "input": query
+    })
+    return result
+
+if __name__ == "__main__":
+    bumblebee = build_bumblebee()
+    result = bumblebee.invoke({
+        "input": "compilateurs"
     })
 
-    return result
+    print(result)
