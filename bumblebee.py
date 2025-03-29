@@ -15,9 +15,9 @@ def load_db(k:int=3):
 def build_bumblebee():
     llm = ChatOllama(
         model="gemma3:4b",
-        temperature=0.9
+        temperature=0.3
     )
-    retriever = load_db()
+    retriever = load_db(4)
 
     template = """
     Use the following context to answer the question.
