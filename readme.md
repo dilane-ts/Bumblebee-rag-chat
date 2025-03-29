@@ -1,6 +1,6 @@
-# Bumblebee : Un Système de Modèle de Langage Augmenté par Recherche
+# Bumblebee : Un Système de Modèle de Langage Augmenté par recuperation
 
-Bumblebee est un système de modèle de langage augmenté par recherche conçu pour répondre à des questions en combinant la recherche de documents basée sur des vecteurs et un modèle de langage. Il prend en charge les réponses en streaming et maintient le contexte conversationnel grâce à l'historique des interactions.
+Bumblebee est un système de modèle de langage augmenté par recuperation conçu pour répondre à des questions en combinant la recherche de documents basée sur des vecteurs et un modèle de langage. Il prend en charge les réponses en streaming et maintient le contexte conversationnel grâce à l'historique des interactions.
 
 ## Fonctionnalités
 
@@ -114,19 +114,6 @@ pip install -r requirements.txt
 2. **Créer le Store de Vecteurs** : Exécutez `create_vectorstore.py` pour traiter les documents.
 3. **Poser des Questions** : Utilisez `bumblebee.py` pour interroger le système.
 
----
-
-## Résolution des Problèmes
-
-### Erreurs Courantes
-1. **`ValueError: cannot reshape array`**  
-   Assurez-vous que Tesseract OCR est installé et correctement configuré.
-
-2. **`LangChainDeprecationWarning`**  
-   Mettez à jour votre code pour utiliser les dernières méthodes de LangChain (par exemple, `invoke` au lieu de `__call__`).
-
-3. **`ValidationError: Input should be a valid string`**  
-   Assurez-vous que la méthode `_call` de votre classe de modèle de langage retourne une chaîne de caractères, et non un générateur.
 
 ---
 
@@ -155,4 +142,4 @@ Ce projet est sous licence MIT. Consultez le fichier `LICENSE` pour plus de dét
 
 ## Contact
 
-Pour toute question ou suggestion, veuillez contacter [votre-email@example.com].
+Pour toute question ou suggestion, veuillez contacter [lefakongdilane@gmail.com].
