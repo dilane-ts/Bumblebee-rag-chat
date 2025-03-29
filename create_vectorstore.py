@@ -1,13 +1,9 @@
-import os 
-from dotenv import load_dotenv
-
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders import PyPDFDirectoryLoader
 from langchain_community.embeddings import SentenceTransformerEmbeddings
 
 
-load_dotenv()
 
 def load_documents(folder_path: str):
 
@@ -29,6 +25,6 @@ def create_vectorstore(documents):
     vector_store.save_local('faiss_index')
 
 if __name__ == "__main__":
-    folder_path = os.environ['DOCUMENTS_PATH']
+    folder_path = "./documents"
     documents = load_documents(folder_path)
     create_vectorstore(documents)

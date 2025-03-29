@@ -1,17 +1,9 @@
-import os
-from dotenv import load_dotenv
-
 from langchain.prompts import PromptTemplate
 from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.chains.retrieval import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_ollama import ChatOllama
-from langchain_google_genai.llms import GoogleGenerativeAI
-load_dotenv()
-GOOGLE_API_KEY = os.environ['GOOGLE_API_KEY']
-MODEL_ID = os.environ['MODEL_ID']
-MODEL_TEMPERATURE = os.environ['MODEL_TEMPERATURE']
 
 def load_db(k:int=3):
     # Load vectorstore
@@ -21,11 +13,14 @@ def load_db(k:int=3):
     return retriever
 
 def build_bumblebee():
-    llm = GoogleGenerativeAI(model=MODEL_ID, temperature=MODEL_TEMPERATURE)
-    retriever = load_db(4)
+    llm = ChatOllama(
+        model="gemma3:4b",
+        temperature=0.9
+    )
+    retriever = load_db()
 
     template = """
-    Use the following context to answer the question. If unsure, say "I don't know.".
+    Use the following context to answer the question.
     Response in the language of query.
     Context:
     {context}
@@ -51,4 +46,4 @@ if __name__ == "__main__":
         "input": "compilateurs"
     })
 
-    print(result)
+    print(result['answer'])
